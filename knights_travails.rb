@@ -38,23 +38,22 @@ class Board
         puts '  -------------------------------------'
     end
 
-    def build_tree_and_find(start_position=self.knight.position, queue=[], end_position)
+    def build_tree_and_find(start_node=Node.new(self.knight.position), queue=[], depth=0, end_position)
         
-        children = find_children_and_discard(start_position)
-        children_positions = children.map { |child| arr_to_position(child) }
-        children_positions.each{ |child| queue << child}
-        p start_position
-        if start_position == end_position
-            return "Found it!"
+        start_node.children = find_children_and_discard(start_node)
+        p start_node.children
+        children_positions = start_node.children.map { |child| arr_to_position(child) }
+        p children_positions
+        children_positions.each{ |child| queue << Node.new(child, depth+1)}
+        p queue
+        if start_node.value == end_position
+            return "Found it!: #{start_node.value} #{depth}"
         else
-            return build_tree_and_find(queue.shift, queue, end_position)
+            while queue.any?
+                n = queue.shift
+                return build_tree_and_find(n, queue, n.depth, end_position)
+            end
         end
-        #unless children_positions.any? { |child_position| child_position == end_position }
-        #     node = Node.new(start_position, children)
-        #     p children
-        #     children.each{ |child| build_tree_and_find(arr_to_position(child), end_position) }
-        # #end
-        # return "You win"
     end
 
     def position_to_arr(position)
@@ -93,6 +92,9 @@ class Board
 
     def find_children_and_discard(position=@knight.position)
         
+        if position.class == Node
+            position = position.value
+        end
         start_array = position_to_arr(position)
         one=[1,2]
         two=[2,1]
@@ -116,6 +118,7 @@ class Board
 end
 
 class Knight
+
     attr_accessor :position
 
     def initialize(position)
@@ -127,16 +130,16 @@ end
 
 class Node
 
-    attr_accessor :value, :children
+    attr_accessor :value, :children, :depth
 
-    def initialize(value, children)
+    def initialize(value, depth=0)
         @value = value
-        @children = children
+        @depth = depth
     end
-
 end
 
-board = Board.new("3d")
+
+board = Board.new("3a")
 p board.build_tree_and_find("6a")
 #board.position_to_arr('2e')
 #p board.positions
