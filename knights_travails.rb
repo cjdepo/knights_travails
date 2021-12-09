@@ -20,7 +20,7 @@ class Board
             end
             if row.length == 7
                 if position == self.knight.position
-                    row.push("   ")
+                    row.push("  ")
                 else
                     row.push(position)
                 end
@@ -37,14 +37,82 @@ class Board
         end
         puts '  -------------------------------------'
     end
-            
 
-    # def knight_move(position=@knight.position, end_position)
+    def build_tree_and_find(start_position=self.knight.position, queue=[], end_position)
         
-    #     @knight.position
-    # end
+        children = find_children_and_discard(start_position)
+        children_positions = children.map { |child| arr_to_position(child) }
+        children_positions.each{ |child| queue << child}
+        p start_position
+        if start_position == end_position
+            return "Found it!"
+        else
+            return build_tree_and_find(queue.shift, queue, end_position)
+        end
+        #unless children_positions.any? { |child_position| child_position == end_position }
+        #     node = Node.new(start_position, children)
+        #     p children
+        #     children.each{ |child| build_tree_and_find(arr_to_position(child), end_position) }
+        # #end
+        # return "You win"
+    end
 
+    def position_to_arr(position)
+        arr = []
+        @rows.each do |row|
+            if position[0] == row.to_s
+                arr[0] = row.to_i
+            end
+        end
+        @columns.each_with_index do |column, i|
+            if position[1] == column.to_s
+                arr[1] = i + 1
+            end
+        end
+        arr
+    end
+    
+    def arr_to_position(arr)
+        position = ''
+        @rows.each do |row|
+            if arr[0] == row.to_i
+                position[0] = row.to_s
+            end
+        end
+        @columns.each_with_index do |column, i|
+            if arr[1] == i + 1
+                position[1] = column.to_s
+            end
+        end
+        position
+    end
 
+                
+
+    
+
+    def find_children_and_discard(position=@knight.position)
+        
+        start_array = position_to_arr(position)
+        one=[1,2]
+        two=[2,1]
+        four=[-1,2]
+        five=[-2,1]
+        seven=[-1,-2]
+        eight=[-2,-1]
+        ten=[-2,1]
+        eleven=[-1,2]
+        knight_moves = [one, two, four, five, seven, eight, ten, eleven]
+        children = []
+        knight_moves.each_with_index do |move, i|
+            new_arr = move.map.with_index{ |v, i| v + start_array[i]}
+            unless new_arr.any?{ |arr| arr > 8 || arr < 1 }
+                children << new_arr
+            end
+            
+        end
+        children 
+    end
 end
 
 class Knight
@@ -53,11 +121,25 @@ class Knight
     def initialize(position)
         @position = position
     end
+    
+
+end
+
+class Node
+
+    attr_accessor :value, :children
+
+    def initialize(value, children)
+        @value = value
+        @children = children
+    end
 
 end
 
 board = Board.new("3d")
-p board.positions
-p board.knight.position
-board.print_board
+p board.build_tree_and_find("6a")
+#board.position_to_arr('2e')
+#p board.positions
+#p board.knight.position
+#board.print_board
 #board.knight_move(board.knight.position, [3, 3])
