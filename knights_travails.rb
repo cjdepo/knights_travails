@@ -38,20 +38,26 @@ class Board
         puts '  -------------------------------------'
     end
 
-    def build_tree_and_find(start_node=Node.new(self.knight.position), queue=[], depth=0, end_position)
+    def build_tree_and_find_path(start_node=Node.new(self.knight.position), queue=[], depth=0, end_position)
         
         start_node.children = find_children_and_discard(start_node)
-        p start_node.children
         children_positions = start_node.children.map { |child| arr_to_position(child) }
-        p children_positions
-        children_positions.each{ |child| queue << Node.new(child, depth+1)}
-        p queue
+        children_positions.each{ |child| queue << Node.new(child, start_node, depth+1)}
         if start_node.value == end_position
-            return "Found it!: #{start_node.value} #{depth}"
+            puts "Found it: #{start_node.value}, depth: #{start_node.depth}"
+            puts "Path is: "
+            node = start_node
+            path = []
+            until node.parent == nil
+                path.unshift(node.parent.value)
+                node = node.parent
+            end
+            path
         else
             while queue.any?
                 n = queue.shift
-                return build_tree_and_find(n, queue, n.depth, end_position)
+                return build_tree_and_find_path(n, queue, n.depth, end_position)
+                
             end
         end
     end
@@ -130,17 +136,22 @@ end
 
 class Node
 
-    attr_accessor :value, :children, :depth
+    attr_accessor :value, :children, :parent, :depth
 
-    def initialize(value, depth=0)
+    def initialize(value, parent=nil, depth=0)
         @value = value
         @depth = depth
+        @parent = parent
     end
 end
 
 
 board = Board.new("3a")
-p board.build_tree_and_find("6a")
+puts board.build_tree_and_find_path("7e")
+puts "7e"
+
+#board.build_tree_and_find_path("5e").each{ |position| board.knight.position = position; board.print_board() }
+#board.print_board()
 #board.position_to_arr('2e')
 #p board.positions
 #p board.knight.position
